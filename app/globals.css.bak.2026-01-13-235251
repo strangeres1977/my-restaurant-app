@@ -1,0 +1,370 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  globals.css moderno para Next.js (app router) + Tailwind.
+  - Variables de tema (modo claro por defecto + modo oscuro automático)
+  - Base typography, fondos, bordes, inputs, botones, cards, tablas
+  - Helpers utilitarios (container, card, btn, input, badge, etc)
+*/
+
+:root {
+  color-scheme: light;
+
+  /* base */
+  --bg: 255 255 255;
+  --fg: 17 24 39;
+
+  /* surfaces */
+  --card: 255 255 255;
+  --card-fg: 17 24 39;
+  --muted: 249 250 251;
+  --muted-fg: 107 114 128;
+
+  /* borders */
+  --border: 229 231 235;
+  --ring: 59 130 246;
+
+  /* accents */
+  --primary: 17 24 39;
+  --primary-fg: 255 255 255;
+
+  --secondary: 243 244 246;
+  --secondary-fg: 17 24 39;
+
+  --accent: 239 246 255;
+  --accent-fg: 30 64 175;
+
+  --danger: 239 68 68;
+  --danger-fg: 255 255 255;
+
+  /* radii */
+  --radius: 14px;
+
+  /* shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow: 0 8px 30px rgba(0,0,0,.08);
+
+  /* selection */
+  --selection: 219 234 254;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: 10 10 12;
+    --fg: 229 231 235;
+
+    --card: 16 16 20;
+    --card-fg: 229 231 235;
+
+    --muted: 24 24 28;
+    --muted-fg: 156 163 175;
+
+    --border: 39 39 42;
+    --ring: 59 130 246;
+
+    --primary: 229 231 235;
+    --primary-fg: 10 10 12;
+
+    --secondary: 24 24 28;
+    --secondary-fg: 229 231 235;
+
+    --accent: 30 58 138;
+    --accent-fg: 219 234 254;
+
+    --danger: 248 113 113;
+    --danger-fg: 10 10 12;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
+    --shadow: 0 10px 40px rgba(0,0,0,.45);
+
+    --selection: 30 64 175;
+  }
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: geometricPrecision;
+  }
+
+  ::selection {
+    background: rgb(var(--selection));
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* tipografía base */
+  h1 { @apply text-3xl md:text-4xl tracking-tight; }
+  h2 { @apply text-2xl md:text-3xl tracking-tight; }
+  h3 { @apply text-xl md:text-2xl tracking-tight; }
+  h4 { @apply text-lg md:text-xl; }
+
+  p { @apply leading-7; }
+
+  code, pre, kbd, samp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  pre {
+    @apply overflow-auto rounded-xl border p-4 text-sm;
+    background: rgb(var(--muted));
+  }
+
+  /* inputs nativos */
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  /* mejorar el render de imágenes */
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer components {
+  /* contenedor consistente */
+  .container {
+    @apply mx-auto w-full max-w-7xl px-4;
+  }
+
+  /* layout de página */
+  .page {
+    @apply min-h-screen;
+  }
+
+  .page-section {
+    @apply py-10 md:py-14;
+  }
+
+  /* card */
+  .card {
+    @apply rounded-2xl border;
+    background: rgb(var(--card));
+    color: rgb(var(--card-fg));
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-header {
+    @apply px-5 pt-5 pb-3 border-b;
+  }
+
+  .card-title {
+    @apply text-lg tracking-tight;
+  }
+
+  .card-subtitle {
+    @apply text-sm;
+    color: rgb(var(--muted-fg));
+  }
+
+  .card-content {
+    @apply p-5;
+  }
+
+  .card-footer {
+    @apply px-5 pb-5 pt-3 border-t;
+  }
+
+  /* botones */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm border transition;
+    background: rgb(var(--secondary));
+    color: rgb(var(--secondary-fg));
+    border-color: rgb(var(--border));
+  }
+
+  .btn:hover {
+    filter: brightness(0.98);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-fg));
+    border-color: rgb(var(--primary));
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.06);
+  }
+
+  .btn-ghost {
+    background: transparent;
+  }
+
+  .btn-danger {
+    background: rgb(var(--danger));
+    color: rgb(var(--danger-fg));
+    border-color: rgb(var(--danger));
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--ring), .35);
+  }
+
+  /* inputs */
+  .input, .select, .textarea {
+    @apply w-full rounded-xl border px-3 py-2 text-sm outline-none transition;
+    background: rgb(var(--card));
+    border-color: rgb(var(--border));
+  }
+
+  .textarea {
+    @apply min-h-[110px];
+  }
+
+  .input::placeholder, .textarea::placeholder {
+    color: rgb(var(--muted-fg));
+  }
+
+  .input:focus, .select:focus, .textarea:focus {
+    box-shadow: 0 0 0 3px rgba(var(--ring), .25);
+    border-color: rgba(var(--ring), .8);
+  }
+
+  .label {
+    @apply text-sm mb-1 block;
+    color: rgb(var(--muted-fg));
+  }
+
+  /* badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs border;
+    background: rgb(var(--muted));
+    color: rgb(var(--fg));
+    border-color: rgb(var(--border));
+  }
+
+  .badge-accent {
+    background: rgb(var(--accent));
+    color: rgb(var(--accent-fg));
+    border-color: rgba(var(--ring), .25);
+  }
+
+  /* tablas */
+  .table {
+    @apply w-full border rounded-2xl overflow-hidden;
+    border-color: rgb(var(--border));
+    background: rgb(var(--card));
+  }
+
+  .table table {
+    @apply w-full text-sm;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .table thead th {
+    @apply text-left px-4 py-3 border-b;
+    color: rgb(var(--muted-fg));
+    background: rgb(var(--muted));
+    border-color: rgb(var(--border));
+    font-weight: 600;
+  }
+
+  .table tbody td {
+    @apply px-4 py-3 border-b;
+    border-color: rgb(var(--border));
+  }
+
+  .table tbody tr:hover td {
+    background: rgba(var(--selection), .35);
+  }
+
+  .table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* header/nav mejorado */
+  .topbar {
+    @apply sticky top-0 z-50 border-b;
+    background: rgba(var(--bg), .75);
+    backdrop-filter: blur(10px);
+  }
+
+  .topbar-inner {
+    @apply mx-auto max-w-7xl px-4 h-14 flex items-center justify-between;
+  }
+
+  .topbar-brand {
+    @apply text-sm md:text-base tracking-tight;
+  }
+
+  .topbar-links {
+    @apply flex items-center gap-4 text-sm;
+    color: rgb(var(--muted-fg));
+  }
+
+  .topbar-links a:hover {
+    color: rgb(var(--fg));
+  }
+
+  /* alertas */
+  .alert {
+    @apply rounded-2xl border p-4 text-sm;
+    background: rgb(var(--muted));
+  }
+
+  .alert-danger {
+    border-color: rgba(239, 68, 68, .4);
+    background: rgba(239, 68, 68, .10);
+  }
+
+  /* layout dashboard */
+  .dashboard-shell {
+    @apply min-h-[calc(100vh-56px)] w-full;
+  }
+
+  /* dashboard: evitar centrado por "container" heredado */
+  .dashboard-main .container {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+@layer utilities {
+  .text-muted {
+    color: rgb(var(--muted-fg));
+  }
+
+  .bg-muted {
+    background: rgb(var(--muted));
+  }
+
+  .ring-focus {
+    box-shadow: 0 0 0 3px rgba(var(--ring), .25);
+  }
+}

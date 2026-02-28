@@ -1,0 +1,39 @@
+import "./globals.css";
+import type { Metadata } from "next";
+import PublicHeaderGate from "@/app/components/layout/PublicHeaderGate";
+
+export const metadata: Metadata = {
+  title: "Projects Platform",
+  description: "Plataforma de restaurantes",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="es">
+      <body>
+        <PublicHeaderGate>
+          <header className="border-b">
+            <nav className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between">
+              <div className="font-semibold">Projects Platform</div>
+              <div className="flex gap-4 text-sm">
+                <a href="/" className="hover:underline">
+                  Home
+                </a>
+                <a href="/dashboard" className="hover:underline">
+                  Dashboard
+                </a>
+              </div>
+            </nav>
+          </header>
+        </PublicHeaderGate>
+
+        {children}
+      </body>
+    </html>
+  );
+}
+

@@ -1,0 +1,164 @@
+import prisma from "@/lib/prisma";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+function normalizeColor(input?: string | null) {
+  if (!input) return "#22c55e";
+  const c = input.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+  if (/^#[0-9a-fA-F]{3}$/.test(c)) return c;
+  return "#22c55e";
+}
+
+function isHttpUrl(url?: string | null) {
+  if (!url) return false;
+  return /^https?:\/\//i.test(url);
+}
+
+export default async function RestaurantHome({ params }: { params: { restaurant: string } }) {
+  const slug = params.restaurant;
+
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { slug },
+    select: {
+      slug: true,
+      name: true,
+      description: true,
+      themeColor: true,
+      bannerUrl: true,
+      logoUrl: true,
+      contactEmail: true,
+    },
+  });
+
+  if (!restaurant) notFound();
+
+  const theme = normalizeColor(restaurant.themeColor);
+  const bannerOk = isHttpUrl(restaurant.bannerUrl);
+  const logoOk = isHttpUrl(restaurant.logoUrl);
+
+  return (
+    <div className="min-h-screen bg-[rgb(var(--bg))] text-[rgb(var(--fg))]" style={{ ["--accent" as any]: theme }}>
+      <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5">
+          <div className="absolute inset-0 opacity-60">
+            <div
+              className="absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl"
+              style={{ background: "var(--accent)" }}
+            />
+            <div className="absolute top-10 right-0 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+          </div>
+
+          <div className="relative">
+            <div className="h-44 md:h-56 w-full">
+              {bannerOk ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={restaurant.bannerUrl as string}
+                  alt="banner"
+                  className="h-full w-full object-cover opacity-100"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-br from-[rgb(var(--accent))] to-transparent" />
+              )}
+            </div>
+
+            <div className="p-5 md:p-8">
+              <div className="-mt-10 flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
+                <div className="flex items-end gap-4">
+                  <div className="h-20 w-20 md:h-24 md:w-24 rounded-2xl border border-white/10 bg-[rgb(var(--bg))] overflow-hidden shadow-lg">
+                    {logoOk ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={restaurant.logoUrl as string}
+                        alt="logo"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full grid place-items-center text-[rgb(var(--fg))]/60 text-sm">
+                        logo
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pb-1">
+                    <div className="text-2xl md:text-3xl leading-tight">{restaurant.name}</div>
+                    <div className="mt-1 text-[rgb(var(--fg))]/70">
+                      {restaurant.description || "sin descripción todavía"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:ml-auto flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href={`/${restaurant.slug}/pedido`}
+                    className="rounded-2xl px-5 py-3 text-sm md:text-base font-medium border border-white/10 bg-white/10 hover:bg-white/15"
+                    style={{ background: "color-mix(in oklab, var(--accent) 18%, transparent)" }}
+                  >
+                    hacer pedido
+                  </Link>
+
+                  <Link
+                    href={`/${restaurant.slug}/productos`}
+                    className="rounded-2xl px-5 py-3 text-sm md:text-base font-medium border border-white/10 bg-white/5 hover:bg-white/10"
+                  >
+                    ver productos
+                  </Link>
+
+                  <Link
+                    href={`/${restaurant.slug}/contacto`}
+                    className="rounded-2xl px-5 py-3 text-sm md:text-base font-medium border border-white/10 bg-white/5 hover:bg-white/10"
+                  >
+                    contacto
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="text-sm text-[rgb(var(--fg))]/60">horario</div>
+                  <div className="mt-1">pendiente de configurar</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="text-sm text-[rgb(var(--fg))]/60">recogida</div>
+                  <div className="mt-1">en local o envío (pronto)</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="text-sm text-[rgb(var(--fg))]/60">contacto</div>
+                  <div className="mt-1 text-[rgb(var(--fg))]/80">{restaurant.contactEmail || "sin email"}</div>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
+                <div className="text-lg">sobre nosotros</div>
+                <div className="mt-2 text-[rgb(var(--fg))]/70 leading-relaxed">
+                  {restaurant.description ||
+                    "aquí irá una descripción chula del restaurante. de momento no hay texto."}
+                </div>
+
+                <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href={`/${restaurant.slug}/pedido`}
+                    className="rounded-2xl px-5 py-3 text-sm md:text-base font-medium border border-white/10"
+                    style={{ background: "var(--accent)", color: "#0b0b0f" }}
+                  >
+                    pedir ahora
+                  </Link>
+
+                  <Link
+                    href={`/${restaurant.slug}/contacto`}
+                    className="rounded-2xl px-5 py-3 text-sm md:text-base font-medium border border-white/10 bg-white/5 hover:bg-white/10"
+                  >
+                    hablar con nosotros
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-8 text-xs text-[rgb(var(--fg))]/40">tenant: {restaurant.slug}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

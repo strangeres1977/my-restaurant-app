@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  password            String
+  name                String?
+  role                Role                 @default(USER)
+  restaurants         Restaurant[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  description     String?
+  themeColor      String?          @default("#3B82F6")
+  bannerUrl       String?
+  logoUrl         String?
+  contactEmail    String?
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id])
+  dishes          Dish[]
+  orders          Order[]
+  messages        ContactMessage[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  landingTemplate LandingTemplate  @default(CATALOG)
+  openingHours    String?
+
+  @@map("restaurants")
+}
+
+model Dish {
+  id          String  @id @default(cuid())
+  name        String
+  price       Float
+  description String?
+  category    String?
+
+  imageUrl   String?
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+  sort       Int     @default(0)
+
+  restaurantId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, isFeatured, isActive, sort])
+  @@map("dishes")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  customerName  String
+  customerEmail String
+  total         Float
+  status        OrderStatus @default(PENDING)
+  items         Json
+  restaurantId  String
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@map("orders")
+}
+
+model ContactMessage {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  name    String
+  email   String
+  subject String?
+  message String
+
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([restaurantId, createdAt])
+  @@map("contact_messages")
+}
+
+enum Role {
+  USER
+  PROJECT_OWNER
+  RESTAURANT_OWNER
+  SUPER_ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum LandingTemplate {
+  CATALOG
+  BRANDING
+  INFO
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}

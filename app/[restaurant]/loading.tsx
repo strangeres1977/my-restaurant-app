@@ -1,0 +1,21 @@
+export default function Loading() {
+  return (
+    <div className="min-h-screen bg-[rgb(var(--bg))] text-[rgb(var(--fg))] p-8">
+      <div className="mx-auto max-w-5xl">
+        <div className="h-40 w-full rounded-3xl bg-white/10 animate-pulse" />
+        <div className="mt-6 flex items-center gap-4">
+          <div className="h-16 w-16 rounded-2xl bg-white/10 animate-pulse" />
+          <div className="flex-1">
+            <div className="h-6 w-64 bg-white/10 rounded animate-pulse" />
+            <div className="mt-2 h-4 w-96 bg-white/10 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="h-24 rounded-2xl bg-white/10 animate-pulse" />
+          <div className="h-24 rounded-2xl bg-white/10 animate-pulse" />
+          <div className="h-24 rounded-2xl bg-white/10 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}

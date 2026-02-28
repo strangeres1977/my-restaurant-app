@@ -1,0 +1,43 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+import jwt from "jsonwebtoken";
+
+function getToken(req) {
+  const cookie = req.cookies.get("auth-token");
+  return cookie?.value || null;
+}
+
+function requireAuth(req) {
+  const token = getToken(req);
+  if (!token) return { ok: false, status: 401, error: "no auth" };
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    return { ok: true, payload };
+  } catch {
+    return { ok: false, status: 401, error: "invalid token" };
+  }
+}
+
+export async function PATCH(req, { params }) {
+  const auth = requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const { id } = params;
+
+  const body = await req.json().catch(() => null);
+  const read = body?.read;
+
+  if (typeof read !== "boolean") {
+    return NextResponse.json({ error: "read debe ser boolean" }, { status: 400 });
+  }
+
+  const updated = await prisma.contactMessage.update({
+    where: { id },
+    data: { read },
+    select: { id: true, read: true },
+  });
+
+  return NextResponse.json({ success: true, message: updated });
+}

@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import crypto from "crypto";
+
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => ({}));
+  const email = body?.email;
+
+  // siempre responder ok para no filtrar si existe el email
+  if (!email) return NextResponse.json({ ok: true });
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return NextResponse.json({ ok: true });
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 min
+
+  await prisma.passwordResetToken.create({
+    data: { token, userId: user.id, expiresAt },
+  });
+
+  // DEV: lo sacamos por consola (luego lo cambiamos por email real)
+  console.log("RESET LINK:");
+  console.log(`http://127.0.0.1:3000/reset-password?token=${token}`);
+
+  return NextResponse.json({ ok: true });
+}

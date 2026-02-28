@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* tema claro/cálido para webs de comida */
+
+:root {
+  color-scheme: light;
+  forced-color-adjust: none;
+
+  --bg: 255 252 245;        /* crema */
+  --fg: 17 24 39;           /* slate-900 */
+
+  --card: 255 255 255;
+  --card-fg: 17 24 39;
+
+  --muted: 255 246 232;
+  --muted-fg: 107 114 128;
+
+  --border: 234 223 204;
+  --ring: 234 88 12;        /* naranja */
+
+  --primary: 234 88 12;     /* naranja */
+  --primary-fg: 255 255 255;
+
+  --secondary: 255 236 209;
+  --secondary-fg: 124 45 18;
+
+  --accent: 255 246 232;
+  --accent-fg: 124 45 18;
+
+  --danger: 239 68 68;
+  --danger-fg: 255 255 255;
+
+  --radius: 14px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow: 0 12px 40px rgba(0,0,0,.10);
+
+  --selection: 255 214 170;
+}
+
+@media}
+
+@layer base {
+  * { border-color: rgb(var(--border)); }
+  html, body { height: 100%; }
+
+  body {
+    background: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: geometricPrecision;
+  }
+
+  ::selection { background: rgb(var(--selection)); }
+
+  a { color: inherit; text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+  h1 { @apply text-3xl md:text-4xl tracking-tight; }
+  h2 { @apply text-2xl md:text-3xl tracking-tight; }
+  h3 { @apply text-xl md:text-2xl tracking-tight; }
+  h4 { @apply text-lg md:text-xl; }
+
+  p { @apply leading-7; }
+
+  code, pre, kbd, samp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  pre {
+    @apply overflow-auto rounded-xl border p-4 text-sm;
+    background: rgb(var(--muted));
+  }
+
+  input, textarea, select, button { font: inherit; color: inherit; }
+  textarea { resize: vertical; }
+
+  img, video { max-width: 100%; height: auto; }
+}
+
+@layer components {
+  .container { @apply mx-auto w-full max-w-7xl px-4; }
+
+  .card {
+    @apply rounded-2xl border;
+    background: rgb(var(--card));
+    color: rgb(var(--card-fg));
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm border transition;
+    background: rgb(var(--secondary));
+    color: rgb(var(--secondary-fg));
+    border-color: rgb(var(--border));
+  }
+  .btn:hover { filter: brightness(0.98); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--ring), .35); }
+
+  .btn-primary {
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-fg));
+    border-color: rgb(var(--primary));
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+
+  .btn-ghost { background: transparent; }
+
+  .btn-danger {
+    background: rgb(var(--danger));
+    color: rgb(var(--danger-fg));
+    border-color: rgb(var(--danger));
+  }
+
+  .input, .select, .textarea {
+    @apply w-full rounded-xl border px-3 py-2 text-sm outline-none transition;
+    background: rgb(var(--card));
+    border-color: rgb(var(--border));
+  }
+  .textarea { @apply min-h-[110px]; }
+  .input::placeholder, .textarea::placeholder { color: rgb(var(--muted-fg)); }
+  .input:focus, .select:focus, .textarea:focus {
+    box-shadow: 0 0 0 3px rgba(var(--ring), .25);
+    border-color: rgba(var(--ring), .8);
+  }
+
+  .label { @apply text-sm mb-1 block; color: rgb(var(--muted-fg)); }
+
+  .topbar {
+    @apply sticky top-0 z-50 border-b;
+    background: rgba(var(--bg), .82);
+    backdrop-filter: blur(10px);
+  }
+  .topbar-inner { @apply mx-auto max-w-7xl px-4 h-14 flex items-center justify-between; }
+  .topbar-brand { @apply text-sm md:text-base tracking-tight; }
+  .topbar-links { @apply flex items-center gap-3 text-sm; color: rgb(var(--muted-fg)); }
+  .topbar-links a:hover { color: rgb(var(--fg)); }
+
+  /* dashboard: evitar centrado por "container" heredado */
+  .dashboard-main .container {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+@layer utilities {
+  .text-muted { color: rgb(var(--muted-fg)); }
+  .bg-muted { background: rgb(var(--muted)); }
+}

@@ -1,0 +1,124 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import prisma from "@/lib/prisma";
+
+type JwtPayload = {
+  role?: "SUPER_ADMIN" | "PROJECT_OWNER" | "RESTAURANT_OWNER" | "USER" | string;
+  userId?: string;
+  restaurantId?: string | null;
+  restaurantSlug?: string | null;
+};
+
+function json(status: number, body: any) {
+  return NextResponse.json(body, { status });
+}
+
+function isValidHexColor(input: string) {
+  return /^#([0-9a-fA-F]{6})$/.test(input);
+}
+
+function isValidUrlOrEmpty(input: string | null | undefined) {
+  if (!input) return true;
+  try {
+    const u = new URL(input);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export async function PATCH(req: Request) {
+  const token = cookies().get("auth-token")?.value;
+  if (!token) return json(401, { error: "no auth" });
+
+  let payload: JwtPayload;
+  try {
+    if (!process.env.JWT_SECRET) return json(500, { error: "JWT_SECRET missing" });
+    payload = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+  } catch {
+    return json(401, { error: "invalid token" });
+  }
+
+  const role = payload.role;
+  const userId = payload.userId;
+
+  if (!role || !userId) return json(401, { error: "invalid session" });
+  if (role !== "SUPER_ADMIN" && role !== "PROJECT_OWNER" && role !== "RESTAURANT_OWNER") {
+    return json(403, { error: "forbidden" });
+  }
+
+  const body = await req.json().catch(() => null);
+  if (!body) return json(400, { error: "invalid json" });
+
+  const {
+    restaurantSlug, // opcional: si SUPER_ADMIN puede mandar slug explícito
+    bannerUrl,
+    logoUrl,
+    themeColor,
+    description,
+    contactEmail,
+  } = body as {
+    restaurantSlug?: string;
+    bannerUrl?: string | null;
+    logoUrl?: string | null;
+    themeColor?: string | null;
+    description?: string | null;
+    contactEmail?: string | null;
+  };
+
+  if (!isValidUrlOrEmpty(bannerUrl)) return json(400, { error: "bannerUrl inválida" });
+  if (!isValidUrlOrEmpty(logoUrl)) return json(400, { error: "logoUrl inválida" });
+
+  if (themeColor && !isValidHexColor(themeColor)) {
+    return json(400, { error: "themeColor debe ser tipo #22c55e" });
+  }
+
+  // reglas de quién puede actualizar qué restaurante
+  let where: any = null;
+
+  if ((role === "PROJECT_OWNER" || role === "RESTAURANT_OWNER")) {
+    // el owner actualiza su restaurante por userId
+    where = { userId };
+  } else {
+    // SUPER_ADMIN:
+    // 1) si viene restaurantSlug en el body, usamos ese
+    // 2) si no viene, usamos el restaurantSlug del token (si existe)
+    // 3) si tampoco existe, intentamos por restaurantId del token
+    const slug = restaurantSlug || payload.restaurantSlug || null;
+    const rid = payload.restaurantId || null;
+
+    if (slug) where = { slug };
+    else if (rid) where = { id: rid };
+    else return json(400, { error: "restaurantSlug requerido para SUPER_ADMIN" });
+  }
+
+  const existing = await prisma.restaurant.findFirst({
+    where,
+    select: { id: true, slug: true },
+  });
+
+  if (!existing) return json(404, { error: "restaurante no encontrado" });
+
+  const updated = await prisma.restaurant.update({
+    where: { id: existing.id },
+    data: {
+      bannerUrl: bannerUrl ?? null,
+      logoUrl: logoUrl ?? null,
+      themeColor: themeColor ?? null,
+      description: description ?? null,
+      contactEmail: contactEmail ?? null,
+    },
+    select: {
+      slug: true,
+      bannerUrl: true,
+      logoUrl: true,
+      themeColor: true,
+      description: true,
+      contactEmail: true,
+      updatedAt: true,
+    },
+  });
+
+  return json(200, { success: true, restaurant: updated });
+}
